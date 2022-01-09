@@ -170,7 +170,7 @@ public class Controller {
     //МЕТОД ДЛЯ ВЫВОДА ИНФОРМАЦИИ ОБ ИГРОКЕ
     //В АРГУМЕНТЫ ПОСТУПАЕТ КОМАНДА ДЛЯ ПРОВЕРКИ КАКУЮ ИМЕННО ИНФОРМАЦИЮ ОТПРАВЛЯТЬ (ОБ ИГРКОЕ ИЛИ БАНКЕ)
     @GetMapping("/getInfo")
-    public Room getInfoRoom(String idRoom){
+    public Room getInfoRoom(@RequestParam String idRoom){
         return rooms.get(idRoom);
     }
 }

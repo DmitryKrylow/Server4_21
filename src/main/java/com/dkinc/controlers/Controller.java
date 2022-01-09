@@ -16,23 +16,13 @@ import java.util.Random;
 public class Controller {
 
     private HashMap<String,Room> rooms = new HashMap<>();
-    private ArrayList<Integer> cards = new ArrayList<>();
+    private Integer[] cards = {6,7,8,9,10,2,3,4,11};
     Random random = new Random();
     boolean sync = false;
 
     User bank;
     User player;
 
-    //ПРИ СОЗДАНИИИ КОНТРОЛЛЕРА ИНИЦАЛИЗИРУЕТСЯ МАССИВ КАРТ
-    public Controller(){
-        initCards();
-    }
-    //КАЖДЫЙ РАУНД МАССИВ БУДЕТ ИНИЦИАЛИЗИРОВАТСЬЯ ЗАНОВО
-    public void initCards(){
-        for(int i = 1; i <= 36; i++){
-            cards.add(i);
-        }
-    }
     //МЕТОД ДЛЯ ТЕСТА СИНХРОНИЗАЦИИ
     @RequestMapping("/testsync")
     public String testSync(@RequestParam @Nullable Integer command){
@@ -112,14 +102,16 @@ public class Controller {
     //2 - КОГДА 2 ИГРОКА НАЖАЛИ HOLD, ТО НАЧИНАЕТСЯ ПРОВЕРКА ПОБЕДИТЕЛЯ
     //0 - КОГДА ИГРОК НАЖАЛ HOLD И БАНК НАЧИНАЕТ БРАТЬ КАРТЫ СЕБЕ
     @GetMapping("/getCard")
-    public void playComand(@RequestParam Integer command, HttpServletResponse httpServletResponse) throws IOException {
+    public Integer playComand(@RequestParam Integer command, HttpServletResponse httpServletResponse) throws IOException {
         if (command == 1) {
+            Integer response = random.nextInt(36);
             if(player.isCanGetCard()) {
-                player.setScore(cards.get(random.nextInt(36)) + player.getScore());
+                player.setScore(cards[cards.length - ((int)Math.ceil(response / 9) * 9 - response) + 1] + player.getScore());
             }else {
-                bank.setScore(cards.get(random.nextInt(36)) + bank.getScore());
+                bank.setScore(cards[cards.length - ((int)Math.ceil(response / 9) * 9 - response) + 1] + bank.getScore());
             }
             checkWin(httpServletResponse);
+            return response;
         }
         if(command == 2){
             httpServletResponse.sendRedirect("/endGame");
@@ -128,6 +120,7 @@ public class Controller {
             player.setCanGetCard(false);
             bank.setCanGetCard(true);
         }
+        return -1;
     }
     //ПРОВЕРКА НА ПОБЕДИТЕЛЯ ИДЕТ КАЖДУЮ НОВУЮ КАРТУ
     //ЕСЛИ ИГРОК НАБРАЛ 21, ТО ОН ВЫИГРАЛ (БАНК АНАЛОГИЧНО)

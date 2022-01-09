@@ -112,17 +112,17 @@ public class Controller {
     //2 - КОГДА 2 ИГРОКА НАЖАЛИ HOLD, ТО НАЧИНАЕТСЯ ПРОВЕРКА ПОБЕДИТЕЛЯ
     //0 - КОГДА ИГРОК НАЖАЛ HOLD И БАНК НАЧИНАЕТ БРАТЬ КАРТЫ СЕБЕ
     @GetMapping("/getCard")
-    public void playComand(@RequestParam Integer command){
+    public void playComand(@RequestParam Integer command, HttpServletResponse httpServletResponse) throws IOException {
         if (command == 1) {
             if(player.isCanGetCard()) {
                 player.setScore(cards.get(random.nextInt(36)) + player.getScore());
             }else {
                 bank.setScore(cards.get(random.nextInt(36)) + bank.getScore());
             }
-            checkWin();
+            checkWin(httpServletResponse);
         }
         if(command == 2){
-            endGame();
+            httpServletResponse.sendRedirect("/endGame");
         }
         if(command == 0){
             player.setCanGetCard(false);
@@ -131,12 +131,12 @@ public class Controller {
     }
     //ПРОВЕРКА НА ПОБЕДИТЕЛЯ ИДЕТ КАЖДУЮ НОВУЮ КАРТУ
     //ЕСЛИ ИГРОК НАБРАЛ 21, ТО ОН ВЫИГРАЛ (БАНК АНАЛОГИЧНО)
-    public void checkWin(){
+    public void checkWin(HttpServletResponse httpServletResponse) throws IOException {
         if(player.getScore() == 21){
-            endGame();
+            httpServletResponse.sendRedirect("/endGame");
         }
         if(bank.getScore() == 21){
-            endGame();
+            httpServletResponse.sendRedirect("/endGame");
         }
     }
     //ПРИ ОТКЛЮЧЕНИИ ИГРОКА КОМНАТА ПРОВЕРЯЕТСЯ НА НАЧИЛИЕ В НЕЙ ИГРОКОВ
@@ -149,9 +149,9 @@ public class Controller {
     //ОТВЕТОМ ЯВЛЯЕТСЯ КОМАНДА, КОТОРАЯ БУДЕТ РЕШАТЬ, ЧТО ВЫСВЕТИТЬ КАЖДОМУ ИГРОКУ НА ЭКАН(WIN, LOSE)
     @GetMapping("/endGame")
     public Integer endGame(){
-        if(player.getScore() > bank.getScore()){
+        if(player.getScore() > bank.getScore() || player.getScore() == 21){
             return 1;
-        }else if(bank.getScore() > player.getScore()) {
+        }else if(bank.getScore() > player.getScore() || bank.getScore() == 21) {
             return 2;
         }else{
             return 0;
@@ -169,5 +169,8 @@ public class Controller {
     }
     //МЕТОД ДЛЯ ВЫВОДА ИНФОРМАЦИИ ОБ ИГРОКЕ
     //В АРГУМЕНТЫ ПОСТУПАЕТ КОМАНДА ДЛЯ ПРОВЕРКИ КАКУЮ ИМЕННО ИНФОРМАЦИЮ ОТПРАВЛЯТЬ (ОБ ИГРКОЕ ИЛИ БАНКЕ)
-//TODO    @GetMapping("/getInfo")
+    @GetMapping("/getInfo")
+    public Room getInfoRoom(String idRoom){
+        return rooms.get(idRoom);
+    }
 }
